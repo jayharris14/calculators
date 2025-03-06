@@ -40,7 +40,12 @@ namespace CalcWeb.Pages
         public void OnPost()
         {
             foreach (string s in Request.Form.Keys)
+
             {
+                if (s.EndsWith("clear"))
+                {
+                    t = 3;
+                }
                 if (s.EndsWith("unit"))
                 {
                     t = 2;
@@ -98,7 +103,7 @@ namespace CalcWeb.Pages
                         HttpContext.Session.SetString("hu1", "cm");
                         HttpContext.Session.SetString("hu2", "ft. & in.");
                         ViewData["wu"] = HttpContext.Session.GetString("wu");
-                        ViewData["u"] = HttpContext.Session.GetString("u"); 
+                        ViewData["u"] = HttpContext.Session.GetString("u");
                     }
                     else if (HttpContext.Session.GetString("hu1") == "cm")
                     {
@@ -191,7 +196,7 @@ namespace CalcWeb.Pages
                     }
                 }
             }
-            if (t != 2)
+            if (t != 2 && t != 3)
             {
                 t = 1;
                 ViewData["wu"] = HttpContext.Session.GetString("wu");
@@ -202,7 +207,12 @@ namespace CalcWeb.Pages
                 ViewData["hu1"] = HttpContext.Session.GetString("hu1");
                 ViewData["hu2"] = HttpContext.Session.GetString("hu2");
                 ViewData["inputwidth"] = HttpContext.Session.GetString("inputwidth");
-                if (Request.Form["weight"] != StringValues.Empty)
+                Console.WriteLine(Request.Form["weight"]);
+                Console.WriteLine(Request.Form["ih"]);
+                Console.WriteLine(Request.Form["oh"]);
+                Console.WriteLine(HttpContext.Session.GetString("hu2"));
+                System.Diagnostics.Debug.Print(Request.Form["weight"]);
+                if (Request.Form["weight"] != "")
                 {
                     weightv = Request.Form["weight"];
                     try
@@ -221,60 +231,22 @@ namespace CalcWeb.Pages
                         t = 0;
                     }
                 }
-                if (Request.Form["ih"] != StringValues.Empty)
+                else
                 {
-                    ih = Request.Form["ih"];
-                    if (HttpContext.Session.GetString("ih") == "m")
+                    weight = 0;
+                }
+                if (Request.Form["ih"] != "" || Request.Form["oh"] != "")
+                {
+                    if (Request.Form["ih"] != "")
                     {
-                        try
+                        ih = Request.Form["ih"];
+                        if (HttpContext.Session.GetString("ih") == "m")
                         {
-                            meters = float.Parse(ih);
-                            iheight = meters* 39.3700787;
-                            height = ((float)iheight);
-                        }
-                        catch (System.FormatException)
-                        {
-                            errormsg = "Invalid format. Values must be integer or decimal";
-                            ViewData["errorm"] = errormsg;
-                            t = 0;
-
-                        }
-                    }
-                    else if (HttpContext.Session.GetString("ih") == "cm")
-                    {
-                        try
-                        {
-                            centimeters = float.Parse(ih);
-                            iheight = (centimeters / 100) * 39.3700787;
-                            height = ((float)iheight);
-                        }
-                        catch (System.FormatException)
-                        {
-                            errormsg = "Invalid format. Values must be integer or decimal";
-                            ViewData["errorm"] = errormsg;
-                            t = 0;
-
-                        }
-                    }
-                    else if (HttpContext.Session.GetString("ih") == "ft.")
-                    {
-                        try
-                        {
-                            feet = float.Parse(ih);
-                        }
-                        catch (System.FormatException)
-                        {
-                            errormsg = "Invalid format. Values must be integer or decimal";
-                            ViewData["errorm"] = errormsg;
-                            t = 0;
-
-                        }
-                        if (Request.Form["oh"] != StringValues.Empty)
-                        {
-                            oh = Request.Form["oh"];
                             try
                             {
-                                inches = float.Parse(oh);
+                                meters = float.Parse(ih);
+                                iheight = meters * 39.3700787;
+                                height = ((float)iheight);
                             }
                             catch (System.FormatException)
                             {
@@ -284,6 +256,67 @@ namespace CalcWeb.Pages
 
                             }
                         }
+                        else if (HttpContext.Session.GetString("ih") == "cm")
+                        {
+                            try
+                            {
+                                centimeters = float.Parse(ih);
+                                iheight = (centimeters / 100) * 39.3700787;
+                                height = ((float)iheight);
+                            }
+                            catch (System.FormatException)
+                            {
+                                errormsg = "Invalid format. Values must be integer or decimal";
+                                ViewData["errorm"] = errormsg;
+                                t = 0;
+
+                            }
+                        }
+                        else if (HttpContext.Session.GetString("ih") == "ft.")
+                        {
+                            Console.WriteLine("money");
+                            try
+                            {
+                                feet = float.Parse(ih);
+                            }
+                            catch (System.FormatException)
+                            {
+                                errormsg = "Invalid format. Values must be integer or decimal";
+                                ViewData["errorm"] = errormsg;
+                                t = 0;
+
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (HttpContext.Session.GetString("ih") == "m")
+                        {
+                            meters = 0;
+                        }
+                        if (HttpContext.Session.GetString("ih") == "cm")
+                        {
+                            centimeters = 0;
+                        }
+                        if (HttpContext.Session.GetString("ih") == "ft.")
+                        {
+                            feet = 0;
+                        }
+                    }
+                    if (Request.Form["oh"] != "")
+                    {
+                        oh = Request.Form["oh"];
+                        try
+                        {
+                            inches = float.Parse(oh);
+                        }
+                        catch (System.FormatException)
+                        {
+                            errormsg = "Invalid format. Values must be integer or decimal";
+                            ViewData["errorm"] = errormsg;
+                            t = 0;
+
+                        }
                         if (t != 0)
                         {
                             height = (feet * 12) + inches;
@@ -291,6 +324,17 @@ namespace CalcWeb.Pages
                             Console.WriteLine(height);
                         }
                     }
+                    else 
+                    {
+                        inches = 0;
+                        if (t != 0)
+                        {
+                            height = (feet * 12) + inches;
+                            Console.WriteLine("b");
+                            Console.WriteLine(height);
+                        }
+                    }
+
                 }
                 if (t != 0)
                 {
@@ -314,8 +358,26 @@ namespace CalcWeb.Pages
                     t = 1;
                 }
             }
+            if (t == 3)
+            {
+                ViewData["wu"] = "lbs.";
+                ViewData["u"] = "kg.";
+                HttpContext.Session.SetString("wu", "lbs.");
+                HttpContext.Session.SetString("u", "kg.");
+                ViewData["hidden"] = "";
+                ViewData["ih"] = "ft.";
+                ViewData["oh"] = "in.";
+                ViewData["hu1"] = "m";
+                ViewData["hu2"] = "cm";
+                ViewData["inputwidth"] = "60px";
+                HttpContext.Session.SetString("hidden", "");
+                HttpContext.Session.SetString("ih", "ft.");
+                HttpContext.Session.SetString("oh", "in.");
+                HttpContext.Session.SetString("inputwidth", "60px");
+                HttpContext.Session.SetString("hu1", "m");
+                HttpContext.Session.SetString("hu2", "cm");
+            }
         }
-
         public void OnGet()
         {
             ViewData["igreeting"] = "CalcWeb";
